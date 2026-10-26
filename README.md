@@ -1,77 +1,109 @@
 # payschedule-operator
-// TODO(user): Add simple overview of use/purpose
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+A Kubernetes operator, written in Go with [kubebuilder](https://book.kubebuilder.io/) and controller-runtime,
+that runs scheduled payment jobs. You describe a job with a `PaySchedule` custom resource,
+and the controller creates and keeps a matching `CronJob` in sync.
+
+## How it works
+
+```
+PaySchedule (pay.mrahman.xyz/v1)  ──owns──▶  CronJob (batch/v1)  ──▶  Job  ──▶  Pod
+        ▲                                         │
+        └──────── status.lastScheduled ◀──────────┘
+```
+
+On every reconcile, the controller:
+
+1. Fetches the `PaySchedule`. If it's gone, there's nothing to do.
+2. Creates or updates the `CronJob` named in `spec.cronName`, using `controllerutil.CreateOrUpdate`.
+   It sets only the fields it owns (schedule, image, command, restart policy), so defaults filled in by the API server are kept.
+3. Sets the `PaySchedule` as the controller owner of the `CronJob`. Deleting the `PaySchedule` garbage-collects the `CronJob`.
+4. Copies `CronJob.status.lastScheduleTime` into `PaySchedule.status.lastScheduled`.
+
+The controller watches `PaySchedule` objects and their owned `CronJob`s (`Owns`). So:
+
+- a spec change rolls out to the `CronJob`
+- a deleted or hand-edited `CronJob` is recreated or reverted
+- the status follows every new schedule run
+
+RBAC is generated from `+kubebuilder:rbac` markers and limited to the resources the controller touches.
+
+## The PaySchedule API
+
+```yaml
+apiVersion: pay.mrahman.xyz/v1
+kind: PaySchedule
+metadata:
+  name: payschedule-sample
+spec:
+  cronName: pay-cron            # name of the CronJob to manage
+  cronSchedule: "*/1 * * * *"   # standard cron syntax
+  jobImage: busybox:latest      # container image of the job
+  jobCmd: echo Hello from PaySchedule!  # run via /bin/sh -c
+```
+
+All spec fields are required and must be non-empty, which the CRD schema enforces.
+
+```sh
+$ kubectl get payschedules
+NAME                 CRONJOB    SCHEDULE      AGE   LAST SCHEDULED
+payschedule-sample   pay-cron   */1 * * * *   3m    20s
+```
 
 ## Getting Started
 
 ### Prerequisites
-- go version v1.20.0+
-- docker version 17.03+.
-- kubectl version v1.11.3+.
-- Access to a Kubernetes v1.11.3+ cluster.
+- Go 1.20+
+- Docker
+- kubectl
+- A Kubernetes cluster, e.g. [kind](https://kind.sigs.k8s.io/)
 
-### To Deploy on the cluster
-**Build and push your image to the location specified by `IMG`:**
-
-```sh
-make docker-build docker-push IMG=<some-registry>/payschedule-operator:tag
-```
-
-**NOTE:** This image ought to be published in the personal registry you specified. 
-And it is required to have access to pull the image from the working environment. 
-Make sure you have the proper permission to the registry if the above commands don’t work.
-
-**Install the CRDs into the cluster:**
+### Run locally against a cluster
 
 ```sh
-make install
-```
-
-**Deploy the Manager to the cluster with the image specified by `IMG`:**
-
-```sh
-make deploy IMG=<some-registry>/payschedule-operator:tag
-```
-
-> **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin 
-privileges or be logged in as admin.
-
-**Create instances of your solution**
-You can apply the samples (examples) from the config/sample:
-
-```sh
+kind create cluster
+make install          # install the CRD
+make run              # run the controller from your machine
 kubectl apply -k config/samples/
+kubectl get payschedules,cronjobs
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
+### Deploy to the cluster
 
-### To Uninstall
-**Delete the instances (CRs) from the cluster:**
+```sh
+make docker-build IMG=payschedule-operator:dev
+kind load docker-image payschedule-operator:dev
+make deploy IMG=payschedule-operator:dev
+```
+
+### Clean up
 
 ```sh
 kubectl delete -k config/samples/
-```
-
-**Delete the APIs(CRDs) from the cluster:**
-
-```sh
+make undeploy
 make uninstall
 ```
 
-**UnDeploy the controller from the cluster:**
+## Testing
 
 ```sh
-make undeploy
+make test
 ```
 
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
+The tests use [envtest](https://book.kubebuilder.io/reference/envtest.html), a real kube-apiserver and etcd with no nodes.
+They check that:
 
-**NOTE:** Run `make --help` for more information on all potential `make` targets
+- the `CronJob` is created with the right spec and owner reference
+- spec changes reach the `CronJob`
+- a deleted `CronJob` is recreated
+- a missing `PaySchedule` is not treated as an error
+- invalid specs are rejected by the CRD schema
 
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+## Limitations
+
+- Changing `spec.cronName` creates a new `CronJob`. The old one is only removed when the `PaySchedule` is deleted.
+- A bad cron expression is rejected when the `CronJob` is created, and shows up only in the controller logs.
+  It isn't reported in the `PaySchedule` status (no status conditions yet).
 
 ## License
 
