@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: payschedules.pay.mrahman.xyz
 spec:
   group: pay.mrahman.xyz
@@ -15,6 +15,12 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.cronName
+      name: CronJob
+      type: string
+    - jsonPath: .spec.cronSchedule
+      name: Schedule
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -27,14 +33,19 @@ spec:
         description: PaySchedule is the Schema for the payschedules API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -42,12 +53,23 @@ spec:
             description: PayScheduleSpec defines the desired state of PaySchedule
             properties:
               cronName:
+                description: CronName is the name of the CronJob created for this
+                  PaySchedule
+                minLength: 1
                 type: string
               cronSchedule:
+                description: CronSchedule is the schedule in Cron format, e.g. "*/5
+                  * * * *"
+                minLength: 1
                 type: string
               jobCmd:
+                description: JobCmd is the shell command the job runs, via `/bin/sh
+                  -c`
+                minLength: 1
                 type: string
               jobImage:
+                description: JobImage is the container image the job runs
+                minLength: 1
                 type: string
             required:
             - cronName

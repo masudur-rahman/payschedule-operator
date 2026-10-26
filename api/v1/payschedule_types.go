@@ -25,10 +25,18 @@ import (
 
 // PayScheduleSpec defines the desired state of PaySchedule
 type PayScheduleSpec struct {
-	CronName     string `json:"cronName"`
+	// CronName is the name of the CronJob created for this PaySchedule
+	//+kubebuilder:validation:MinLength=1
+	CronName string `json:"cronName"`
+	// CronSchedule is the schedule in Cron format, e.g. "*/5 * * * *"
+	//+kubebuilder:validation:MinLength=1
 	CronSchedule string `json:"cronSchedule"`
-	JobImage     string `json:"jobImage"`
-	JobCmd       string `json:"jobCmd"`
+	// JobImage is the container image the job runs
+	//+kubebuilder:validation:MinLength=1
+	JobImage string `json:"jobImage"`
+	// JobCmd is the shell command the job runs, via `/bin/sh -c`
+	//+kubebuilder:validation:MinLength=1
+	JobCmd string `json:"jobCmd"`
 }
 
 // PayScheduleStatus defines the observed state of PaySchedule
@@ -38,6 +46,8 @@ type PayScheduleStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="CronJob",type=string,JSONPath=".spec.cronName"
+// +kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=".spec.cronSchedule"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Last Scheduled",type=date,JSONPath=".status.lastScheduled"
 
