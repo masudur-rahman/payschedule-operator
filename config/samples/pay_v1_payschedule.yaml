@@ -1,15 +1,15 @@
-apiVersion: pay.pathao.com/v1
+apiVersion: pay.mrahman.xyz/v1
 kind: PaySchedule
 metadata:
   labels:
     app.kubernetes.io/name: payschedule
     app.kubernetes.io/instance: payschedule-sample
-    app.kubernetes.io/part-of: dpl
+    app.kubernetes.io/part-of: payschedule-operator
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: dpl
+    app.kubernetes.io/created-by: payschedule-operator
   name: payschedule-sample
 spec:
   cronName: "pay-cron"
   cronSchedule: "*/1 * * * *"
   jobImage: "busybox:latest"
-  jobCmd: "echo Hello Pathao Pay!"
+  jobCmd: "echo Hello from PaySchedule!"

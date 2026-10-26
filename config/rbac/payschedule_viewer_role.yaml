@@ -6,13 +6,13 @@ metadata:
     app.kubernetes.io/name: clusterrole
     app.kubernetes.io/instance: payschedule-viewer-role
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: dpl
-    app.kubernetes.io/part-of: dpl
+    app.kubernetes.io/created-by: payschedule-operator
+    app.kubernetes.io/part-of: payschedule-operator
     app.kubernetes.io/managed-by: kustomize
   name: payschedule-viewer-role
 rules:
 - apiGroups:
-  - pay.pathao.com
+  - pay.mrahman.xyz
   resources:
   - payschedules
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - pay.pathao.com
+  - pay.mrahman.xyz
   resources:
   - payschedules/status
   verbs:

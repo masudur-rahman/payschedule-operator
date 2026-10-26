@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	payv1 "github.com/masudur-rahman/dpl/api/v1"
+	payv1 "github.com/masudur-rahman/payschedule-operator/api/v1"
 )
 
 // PayScheduleReconciler reconciles a PaySchedule object
@@ -39,9 +39,9 @@ type PayScheduleReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=pay.pathao.com,resources=payschedules,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=pay.pathao.com,resources=payschedules/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=pay.pathao.com,resources=payschedules/finalizers,verbs=update
+//+kubebuilder:rbac:groups=pay.mrahman.xyz,resources=payschedules,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=pay.mrahman.xyz,resources=payschedules/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=pay.mrahman.xyz,resources=payschedules/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

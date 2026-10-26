@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	payv1 "github.com/masudur-rahman/dpl/api/v1"
+	payv1 "github.com/masudur-rahman/payschedule-operator/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 

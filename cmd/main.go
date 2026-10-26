@@ -32,8 +32,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	payv1 "github.com/masudur-rahman/dpl/api/v1"
-	"github.com/masudur-rahman/dpl/internal/controller"
+	payv1 "github.com/masudur-rahman/payschedule-operator/api/v1"
+	"github.com/masudur-rahman/payschedule-operator/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -71,7 +71,7 @@ func main() {
 		Metrics:                metricsserver.Options{BindAddress: metricsAddr},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "ccde9764.pathao.com",
+		LeaderElectionID:       "ccde9764.mrahman.xyz",
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly

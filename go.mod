@@ -1,4 +1,4 @@
-module github.com/masudur-rahman/dpl
+module github.com/masudur-rahman/payschedule-operator
 
 go 1.20
 
